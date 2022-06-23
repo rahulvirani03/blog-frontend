@@ -1,7 +1,7 @@
 import { InputAdornment, Typography } from "@material-ui/core";
 import { HowToRegOutlined, PersonAdd, Search } from "@material-ui/icons";
 import { nanoid } from "@reduxjs/toolkit";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -273,9 +273,6 @@ const UserIcon = ({ userItem, handleFollowUser }) => {
 
 export const Home = () => {
   const { width } = useWindowDimensions();
-  let firstRender = useRef(true);
-
-  console.log(firstRender);
   const dummyData = [
     {
       title: "India's takeaway",
@@ -391,15 +388,9 @@ export const Home = () => {
     }
   }, [navigate, user]);
   useEffect(() => {
-    if (firstRender.current) {
-      console.log("if");
-      firstRender.current = false;
-    } else {
-      console.log("else");
-      dispatch(fetchAllBlogs());
-      dispatch(fetchAllUsers());
-    }
-  }, [dispatch, firstRender]);
+    dispatch(fetchAllBlogs());
+    dispatch(fetchAllUsers());
+  }, [dispatch]);
 
   allUsers = useSelector(getAllUsers);
   console.log({ allUsers });
