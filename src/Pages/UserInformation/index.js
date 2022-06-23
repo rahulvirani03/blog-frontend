@@ -1,30 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUser, setProfileImage } from "../../Reducers/authSlice";
+
 import {
   Container,
   CustomButton,
   CustomCardContainer,
-  CustomLink,
   InputField,
   Spacer,
 } from "../../Components/Common";
-import {
-  EditOutlined,
-  Email,
-  HowToRegOutlined,
-  Person,
-  PersonAdd,
-} from "@material-ui/icons";
+import { Email, HowToRegOutlined, Person, PersonAdd } from "@material-ui/icons";
 import styled from "styled-components";
 import { borderRadius, boxShadow, maxWidth } from "../../Utils/constants";
 import { primary } from "../../Utils/colors";
-import { Divider, InputAdornment, Typography } from "@material-ui/core";
-import {
-  fetchMyBlogs,
-  getBlogLoading,
-  getMyBlogs,
-} from "../../Reducers/blogSlice";
+import { InputAdornment, Typography } from "@material-ui/core";
 import { parseISO, formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
 import { getSingleUser, setSpecificUser } from "../../Reducers/userSlice";
@@ -39,13 +27,6 @@ const CustomContainer = styled(Container)`
   @media screen and (max-width: 500px) {
     width: 90%;
   }
-`;
-const AddBlogContainer = styled.div`
-  width: 80%;
-  margin: auto;
-  display: grid;
-  align-items: center;
-  grid-template-columns: 1fr 40% 1fr;
 `;
 
 const ProfilePageContainer = styled(Container)`

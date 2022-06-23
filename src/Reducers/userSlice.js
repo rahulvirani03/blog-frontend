@@ -49,7 +49,7 @@ const userSlice = createSlice({
         console.log(action.payload);
         fetchAllUsers();
         console.log(current(state));
-        state.allUsers.map((user) => {
+        state.allUsers.forEach((user) => {
           if (user.username === action.payload) {
             console.log("inside map");
             state.singleUser = user;
