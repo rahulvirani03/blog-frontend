@@ -1,7 +1,7 @@
 import { InputAdornment, Typography } from "@material-ui/core";
 import { HowToRegOutlined, PersonAdd, Search } from "@material-ui/icons";
 import { nanoid } from "@reduxjs/toolkit";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -13,10 +13,12 @@ import {
   InputField,
 } from "../../Components/Common";
 import { authenticateUser } from "../../Reducers/authSlice";
-import { fetchAllBlogs } from "../../Reducers/blogSlice";
+import { fetchAllBlogs, getAllBlogs } from "../../Reducers/blogSlice";
 import {
   fetchAllUsers,
-  getAllUsers,
+  fetchUnfollowedUsers,
+  followUser,
+  getRemainingUsers,
   setAllUsers,
 } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
@@ -36,7 +38,6 @@ const TopContainer = styled.div`
   .search-container {
     width: 100%;
     margin: 1em auto;
-
     display: flex;
     @media screen and (max-width: 950px) {
       width: 90%;
@@ -47,7 +48,6 @@ const HomeContainer = styled.div`
   display: flex;
   width: 99%;
   margin-top: 1em;
-
   padding: 0 0.5em;
   gap: 2%;
   @media screen and (max-width: 950px) {
@@ -65,15 +65,16 @@ const BlogContainer = styled.div`
   width: 67%;
   border-radius: ${borderRadius};
   padding: 1em;
-
   flex-direction: column;
   display: flex;
   justify-content: center;
   box-shadow: ${boxShadow};
   @media screen and (max-width: 950px) {
     margin: 0 auto;
-
-    width: 97%;
+    width: 90%;
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
   }
   @media screen and (max-width: 550px) {
     margin: 0 auto;
@@ -91,6 +92,7 @@ const BlogCard = styled.div`
   margin-bottom: 1em;
   border-radius: ${borderRadius};
   gap: 10px;
+
   @media screen and (max-width: 550px) {
     flex-direction: column;
     /* margin: 1em auto; */
@@ -114,7 +116,6 @@ const BlogCard = styled.div`
     @media screen and (max-width: 550px) {
       height: 40%;
       width: 100%;
-
       object-fit: cover;
     }
     h4 {
@@ -147,13 +148,17 @@ const BlogCard = styled.div`
       display: flex;
     }
     .profile {
+      border: 1px solid BLACK;
       height: 35px;
       width: 35px;
       border-radius: 50%;
-      background-color: ${primary};
-      color: white;
       @media screen and (max-width: 550px) {
         margin-top: 5px;
+      }
+      .img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
       }
     }
     .by {
@@ -184,7 +189,6 @@ const PeopleContainer = styled.div`
   }
   @media screen and (max-width: 650px) {
     width: 90%;
-
     margin: 1em auto;
     .People-Card {
       display: flex;
@@ -196,13 +200,13 @@ const PeopleContainer = styled.div`
     }
   }
 `;
+
 const UserCard = styled.div`
   display: grid;
   max-width: 100%;
   grid-template-columns: 1fr 2fr 1fr;
   padding: 1em 0.5em;
   border: 1px solid #dcdcdc;
-
   margin-bottom: 1em;
   border-radius: ${borderRadius};
 
@@ -237,13 +241,13 @@ const UserCard = styled.div`
   }
 `;
 
-const UserIcon = ({ userItem, handleFollowUser }) => {
+const UserIcon = ({ userItem, HandleFollowUser }) => {
   return (
     <div style={{ margin: "0px", marginTop: "2px" }}>
       {userItem.isFollowed ? (
         <CustomButton
           endIcon={<HowToRegOutlined />}
-          onClick={(userItem) => handleFollowUser(userItem)}
+          onClick={(userItem) => HandleFollowUser(userItem)}
           style={{
             height: "2em",
             fontSize: "15px",
@@ -256,7 +260,7 @@ const UserIcon = ({ userItem, handleFollowUser }) => {
       ) : (
         <CustomButton
           endIcon={<PersonAdd />}
-          onClick={() => handleFollowUser(userItem)}
+          onClick={() => HandleFollowUser(userItem)}
           style={{
             height: "2em",
             fontSize: "15px",
@@ -272,111 +276,13 @@ const UserIcon = ({ userItem, handleFollowUser }) => {
 };
 
 export const Home = () => {
+  const [searching, setSearching] = useState("");
   const { width } = useWindowDimensions();
-  const dummyData = [
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-    {
-      title: "India's takeaway",
-      description:
-        "Dravid has refused to read too much into performances in a single series, but perhaps Shreyas Iyer missed a golden chance to show his wares at No.3. With Rohit Sharma and KL Rahul expected to take the opening slots at the World Cup, Shreyas had the chance to leave his prints all over the #3 spot early - a position for which he will jostle with Virat Kohli. Though Shreyas has also been a victim of trying to hit out in some tough batting conditions against South Africa, there are a couple of red flags - against pace and wrist spin - that dampen his case.       The extra bounce on offer in Australia and the bigger square boundaries will come as further hindrance for the top-order batter who has just not been able to get on top of rising deliveries.            Shreyas Iyer's struggles against pace in this series",
-      tags: ["Cricket", "Sports"],
-      imageURL:
-        "http://res.cloudinary.com/dgfuuouxu/image/upload/v1655726743/gay5mcyijcje30yjuw6l.jpg",
-      time: "2022-06-20T12:05:39.775Z",
-      creatorId: "62b05f8ed3069b5a32821523",
-      isGlobal: true,
-    },
-  ];
   const user = localStorage.getItem("User");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const allBlogs = useSelector(getAllBlogs);
+
   let allUsers;
   useEffect(() => {
     dispatch(authenticateUser());
@@ -388,16 +294,17 @@ export const Home = () => {
     }
   }, [navigate, user]);
   useEffect(() => {
-    dispatch(fetchAllBlogs());
     dispatch(fetchAllUsers());
+    dispatch(fetchAllBlogs());
+    dispatch(fetchUnfollowedUsers());
   }, [dispatch]);
 
-  allUsers = useSelector(getAllUsers);
-  console.log({ allUsers });
+  allUsers = useSelector(getRemainingUsers);
 
-  const handleFollowUser = async (userItem) => {
-    console.log(userItem);
-
+  const handleSearch = (e) => {
+    setSearching(e.target.value.toLowerCase());
+  };
+  const HandleFollowUser = async (userItem) => {
     const newAllUsers = allUsers.map((user) => {
       if (user._id === userItem._id) {
         user = {
@@ -407,14 +314,19 @@ export const Home = () => {
       }
       return user;
     });
-    console.log(newAllUsers);
     dispatch(setAllUsers(newAllUsers));
+    const result = await dispatch(followUser(userItem._id));
+
+    if (result.payload.data === "Followed") {
+      dispatch(fetchUnfollowedUsers());
+    }
   };
 
   return (
     <TopContainer>
       <div class="search-container">
         <SearchField
+          onChange={(e) => handleSearch(e)}
           size="large"
           placeholder="Search blogs users or tags"
           type="text"
@@ -430,38 +342,50 @@ export const Home = () => {
       </div>
       <HomeContainer>
         <BlogContainer>
-          {dummyData.map((data) => (
-            <CustomLink to="/12212">
-              <BlogCard key={nanoid()}>
-                <img src={data.imageURL} alt="Dummy trial" />
-                <div className="card-body">
-                  <span>
-                    <h4>{data.title}</h4>
-                    <p className="description">
-                      {width > 500 &&
-                        data.description.substring(0, 300) + "..."}
-                    </p>
-                    <div className="tag-container">
-                      {data.tags.map((tag) => (
-                        <p key={tag.name} className="tags">
-                          {tag}
-                        </p>
-                      ))}
-                    </div>
-                  </span>
-                  <span>
-                    <FlexBox style={{ alignSelf: "center" }}>
-                      <div className="profile" />{" "}
-                      <div>
-                        <div className="by">Rahul Virani</div>
-                        <BlogTime blogTimeVariable={data.time} />
+          {allBlogs
+            .filter(
+              (blog) =>
+                blog.title.toLowerCase().includes(searching) ||
+                blog.description.toLowerCase().includes(searching) ||
+                blog.username.toLowerCase().includes(searching)
+            )
+            .map((data) => (
+              <CustomLink to={`/blog/${data._id}`}>
+                <BlogCard key={nanoid()}>
+                  <img src={data.imageURL} alt="Dummy trial" />
+                  <div className="card-body">
+                    <span>
+                      <h4>{data.title.substring(0, 70) + ".."}</h4>
+                      <p className="description">
+                        {width > 500 &&
+                          data.description.substring(0, 200) + ".."}
+                      </p>
+                      <div className="tag-container">
+                        {data.tags.map((tag) => (
+                          <p key={tag.name} className="tags">
+                            {tag}
+                          </p>
+                        ))}
                       </div>
-                    </FlexBox>
-                  </span>
-                </div>
-              </BlogCard>
-            </CustomLink>
-          ))}
+                    </span>
+                    <span>
+                      <FlexBox style={{ alignSelf: "center" }}>
+                        <img
+                          className="profile"
+                          src={data.profileURL}
+                          alt={data.username}
+                        />
+
+                        <div>
+                          <div className="by">{data.username}</div>
+                          <BlogTime blogTimeVariable={data.time} />
+                        </div>
+                      </FlexBox>
+                    </span>
+                  </div>
+                </BlogCard>
+              </CustomLink>
+            ))}
         </BlogContainer>
         <PeopleContainer>
           <Typography variant="h5">
@@ -470,25 +394,28 @@ export const Home = () => {
           <div className="People-Card">
             {allUsers?.map((userItem) => {
               return (
-                <CustomLink to={`/users/${userItem.username}`}>
-                  <UserCard key={userItem._id}>
+                <UserCard key={userItem._id}>
+                  <CustomLink to={`/user/${userItem.username}`}>
                     <img
                       className="profile"
                       src={userItem?.profileURL}
                       alt={userItem.username}
                     />
+                  </CustomLink>
+                  <CustomLink to={`/user/${userItem.username}`}>
                     <div className="user-info">
                       <span className="username"> {userItem.username}</span>
                       <span className="email"> {userItem.email}</span>
                     </div>
-                    <div className="follow">
-                      <UserIcon
-                        handleFollowUser={handleFollowUser}
-                        userItem={userItem}
-                      />
-                    </div>
-                  </UserCard>
-                </CustomLink>
+                  </CustomLink>
+
+                  <div className="follow">
+                    <UserIcon
+                      HandleFollowUser={HandleFollowUser}
+                      userItem={userItem}
+                    />
+                  </div>
+                </UserCard>
               );
             })}
           </div>

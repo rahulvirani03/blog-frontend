@@ -8,6 +8,7 @@ if (localStorage.getItem("User") !== "undefined") {
 
 const initialState = {
   user: localUser,
+  profileUser: {},
   error: "",
   loading: true,
 };
@@ -57,6 +58,17 @@ export const authenticateUser = createAsyncThunk(
   }
 );
 
+export const fetchProfileInfo = createAsyncThunk(
+  "auth/fetchProfile",
+  async () => {
+    try {
+      const result = await api.get("/auth/get-profile-info");
+      return result;
+    } catch (err) {
+      return err;
+    }
+  }
+);
 export const setProfileImage = createAsyncThunk(
   "auth/setProfileImage",
   async ({ id, imageFile }) => {
@@ -142,6 +154,11 @@ const authSlice = createSlice({
       .addCase(authenticateUser.fulfilled, (state, action) => {
         state.loading = false;
         console.log(action.payload);
+        if (!action.payload.valid) {
+          // localStorage.removeItem("token");
+          //localStorage.setItem("User");
+          //  state.user = null;
+        }
       })
       .addCase(authenticateUser.rejected, (state, action) => {
         state.loading = true;
@@ -154,8 +171,19 @@ const authSlice = createSlice({
         console.log(action.payload.data.user);
         localStorage.setItem("User", JSON.stringify(action.payload.data.user));
         state.user = action.payload.data.user;
+        state.profileUser.profileURL = action.payload.data.user.profileURL;
       })
       .addCase(setProfileImage.rejected, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchProfileInfo.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchProfileInfo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profileUser = action.payload.data;
+      })
+      .addCase(fetchProfileInfo.rejected, (state, action) => {
         state.loading = true;
       });
   },
@@ -163,5 +191,6 @@ const authSlice = createSlice({
 
 export const getUser = (state) => state.auth.user;
 export const getUserLoading = (state) => state.auth.loading;
+export const getProfileUser = (state) => state.auth.profileUser;
 export const { setUser } = authSlice.actions;
 export default authSlice.reducer;

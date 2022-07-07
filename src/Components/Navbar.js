@@ -23,6 +23,7 @@ const CustomAppBar = styled(AppBar)`
 
 export const Navbar = () => {
   const user = useSelector(getUser);
+
   return (
     <Box>
       <CustomAppBar position="static">

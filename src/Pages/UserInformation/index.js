@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
   Container,
   CustomButton,
   CustomCardContainer,
+  CustomLink,
   InputField,
   Spacer,
 } from "../../Components/Common";
@@ -15,7 +16,13 @@ import { primary } from "../../Utils/colors";
 import { InputAdornment, Typography } from "@material-ui/core";
 import { parseISO, formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
-import { getSingleUser, setSpecificUser } from "../../Reducers/userSlice";
+import {
+  getSingleUser,
+  fetchSingleUser,
+  followUser,
+} from "../../Reducers/userSlice";
+import { getUser } from "../../Reducers/authSlice";
+import { fetchUserBlogs, getSingleUserBlogs } from "../../Reducers/blogSlice";
 
 const CustomContainer = styled(Container)`
   width: 80%;
@@ -132,11 +139,14 @@ const BlogGrid = styled.div`
     padding: 4px;
     text-align: center;
     height: fit-content;
+    width: fit-content;
     margin: auto 2px;
     border-radius: 15px;
   }
   .tag-container {
     text-align: center;
+    display: flex;
+    flex-wrap: wrap;
     width: 100%;
 
     height: 8%;
@@ -182,7 +192,6 @@ const BlogGrid = styled.div`
 `;
 
 const BlogTime = ({ blogTimeVariable }) => {
-  console.log(blogTimeVariable);
   let timeAgo = "";
   if (blogTimeVariable) {
     const date = parseISO(blogTimeVariable);
@@ -197,10 +206,11 @@ const BlogTime = ({ blogTimeVariable }) => {
   );
 };
 
-const UserIcon = ({ user }) => {
+const UserIcon = ({ temp, setTemp, user, follows }) => {
+  const dispatch = useDispatch();
   return (
     <div style={{ margin: "0px", marginTop: "2px" }}>
-      {user.isFollowed ? (
+      {follows || temp ? (
         <CustomButton
           endIcon={<HowToRegOutlined />}
           style={{
@@ -214,6 +224,11 @@ const UserIcon = ({ user }) => {
         </CustomButton>
       ) : (
         <CustomButton
+          onClick={() => {
+            dispatch(followUser(user._id));
+            follows = true;
+            setTemp(true);
+          }}
           endIcon={<PersonAdd />}
           style={{
             height: "2em",
@@ -229,19 +244,28 @@ const UserIcon = ({ user }) => {
   );
 };
 export const UserInformation = () => {
+  let follows = false;
+  const [temp, setTemp] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
-  console.log(location);
   const userPath = location.pathname;
   const userPathArray = userPath.split("/");
   const username = userPathArray[2];
-  console.log({ username });
-  const myblogs = [];
+  const localUser = useSelector(getUser);
   const singleUser = useSelector(getSingleUser);
+  const userBlogs = useSelector(getSingleUserBlogs);
+  console.log(userBlogs);
   console.log({ singleUser });
+
+  localUser.follows.forEach((id) => {
+    if (id === singleUser._id) {
+      follows = true;
+    }
+  });
   const user = singleUser;
   useEffect(() => {
-    dispatch(setSpecificUser(username));
+    dispatch(fetchSingleUser(username));
+    dispatch(fetchUserBlogs(username));
   }, [dispatch, username]);
   return (
     <ProfilePageContainer>
@@ -293,7 +317,12 @@ export const UserInformation = () => {
               variant="standard"
             />
             <Spacer />
-            <UserIcon user={user} />
+            <UserIcon
+              temp={temp}
+              user={singleUser}
+              setTemp={setTemp}
+              follows={follows}
+            />
             <Spacer />
           </InformationCotainer>
         </ProfileInfoContainer>
@@ -308,21 +337,23 @@ export const UserInformation = () => {
         </Typography>
 
         <BlogGrid>
-          {myblogs.map((blog) => {
+          {userBlogs.map((blog) => {
             return (
               <div className="blog-card">
-                <>
-                  <img src={blog.imageURL} alt={blog.title} />
-                  <p>{blog.title}</p>
-                  <div className="tag-container">
-                    {blog.tags.map((tag) => (
-                      <p className="tags">{tag}</p>
-                    ))}
-                  </div>
-                  <p className="description">
-                    {blog.description.substr(0, 80) + "..."}
-                  </p>
-                </>
+                <CustomLink to={`/blog/${blog._id}`}>
+                  <>
+                    <img src={blog.imageURL} alt={blog.title} />
+                    <p>{blog.title.substr(0, 30) + ".."}</p>
+                    <div className="tag-container">
+                      {blog.tags.map((tag) => (
+                        <p className="tags">{tag}</p>
+                      ))}
+                    </div>
+                    <p className="description">
+                      {blog.description.substr(0, 80) + "..."}
+                    </p>
+                  </>
+                </CustomLink>
 
                 <BlogTime blogTimeVariable={blog.time} />
               </div>

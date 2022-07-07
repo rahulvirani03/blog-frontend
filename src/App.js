@@ -28,8 +28,8 @@ function App() {
         <Route path="/user-profile" element={<UserProfile />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/create-blog" element={<CreateBlog />} />
-        <Route path="/:postId" element={<Post />} />
-        <Route path="/users/:username" element={<UserInformation />} />
+        <Route path="blog/:postId" element={<Post />} />
+        <Route path="/user/:username" element={<UserInformation />} />
       </Routes>
     </Box>
   );

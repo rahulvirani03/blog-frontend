@@ -1,8 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../api/index";
+
 const initialState = {
   myBlog: [],
+  singleUserBlogs: [],
   allBlogs: [],
+  singleBlog: {},
   error: "",
   loading: false,
 };
@@ -62,10 +65,31 @@ export const fetchAllBlogs = createAsyncThunk(
       const result = await api.get("/blog/get-all-blogs", {
         headers: { authorization: header },
       });
-      console.log(result.data);
       return result;
     } catch (err) {
-      console.log(err);
+      return err;
+    }
+  }
+);
+export const fetchSingleBlogs = createAsyncThunk(
+  "/blogs/single-blog",
+  async ({ id }) => {
+    try {
+      const res = await api.post("/blog/get-single-blog", { id });
+      return res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+export const fetchUserBlogs = createAsyncThunk(
+  "get-user-blogs",
+  async (username) => {
+    try {
+      console.log("username in fetchUserBlogs" + username);
+      const res = await api.post("/blog/get-user-blogs", { username });
+      return res;
+    } catch (err) {
       return err;
     }
   }
@@ -111,18 +135,61 @@ const blogSlice = createSlice({
       })
       .addCase(fetchAllBlogs.fulfilled, (state, action) => {
         state.loading = false;
-        // const loadedBlogs = action.payload.data.map((blog) => {
-        //   return blog;
-        // });
-        // state.allBlogs = loadedBlogs;
+
+        const editedBlogs = action.payload.data.map((item) => {
+          let categories = JSON.parse(item.tags);
+          return {
+            ...item,
+            tags: categories,
+          };
+        });
+        state.allBlogs = editedBlogs;
       })
       .addCase(fetchAllBlogs.rejected, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchSingleBlogs.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchSingleBlogs.fulfilled, (state, action) => {
+        state.loading = false;
+        let data = action.payload.data;
+        let categories = JSON.parse(data.tags);
+        const singleBlog = {
+          ...data,
+          tags: categories,
+        };
+        state.singleBlog = singleBlog;
+      })
+      .addCase(fetchSingleBlogs.rejected, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchUserBlogs.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchUserBlogs.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log(action.payload.data);
+        const blogs = action.payload.data;
+        const finalBlogList = blogs.map((blog) => {
+          let categories = JSON.parse(blog.tags);
+          const singleBlog = {
+            ...blog,
+            tags: categories,
+          };
+          return singleBlog;
+        });
+        console.log({ finalBlogList });
+        state.singleUserBlogs = finalBlogList;
+      })
+      .addCase(fetchUserBlogs.rejected, (state, action) => {
         state.loading = true;
       });
   },
 });
-
+export const getSingleBlog = (state) => state.blog.singleBlog;
 export const getMyBlogs = (state) => state.blog.myBlog;
 export const getAllBlogs = (state) => state.blog.allBlogs;
 export const getBlogLoading = (state) => state.blog.loading;
+export const getSingleUserBlogs = (state) => state.blog.singleUserBlogs;
 export default blogSlice.reducer;
