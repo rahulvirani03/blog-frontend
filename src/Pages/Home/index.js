@@ -1,7 +1,7 @@
 import { InputAdornment, Typography } from "@material-ui/core";
 import { HowToRegOutlined, PersonAdd, Search } from "@material-ui/icons";
 import { nanoid } from "@reduxjs/toolkit";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -12,13 +12,19 @@ import {
   FlexBox,
   InputField,
 } from "../../Components/Common";
+import { Loader } from "../../Components/Loader";
 import { authenticateUser } from "../../Reducers/authSlice";
-import { fetchAllBlogs, getAllBlogs } from "../../Reducers/blogSlice";
+import {
+  fetchAllBlogs,
+  getAllBlogs,
+  getBlogsLoading,
+} from "../../Reducers/blogSlice";
 import {
   fetchAllUsers,
   fetchUnfollowedUsers,
   followUser,
   getRemainingUsers,
+  getUsersLoading,
   setAllUsers,
 } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
@@ -95,7 +101,6 @@ const BlogCard = styled.div`
 
   @media screen and (max-width: 550px) {
     flex-direction: column;
-    /* margin: 1em auto; */
     height: 325px;
   }
   img {
@@ -276,9 +281,12 @@ const UserIcon = ({ userItem, HandleFollowUser }) => {
 };
 
 export const Home = () => {
+  const usersLoading = useSelector(getUsersLoading);
+  const blogsLoading = useSelector(getBlogsLoading);
   const [searching, setSearching] = useState("");
   const { width } = useWindowDimensions();
   const user = localStorage.getItem("User");
+  console.log("User is " + user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const allBlogs = useSelector(getAllBlogs);
@@ -324,103 +332,109 @@ export const Home = () => {
 
   return (
     <TopContainer>
-      <div class="search-container">
-        <SearchField
-          onChange={(e) => handleSearch(e)}
-          size="large"
-          placeholder="Search blogs users or tags"
-          type="text"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="end">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          variant="outlined"
-        />{" "}
-      </div>
-      <HomeContainer>
-        <BlogContainer>
-          {allBlogs
-            .filter(
-              (blog) =>
-                blog.title.toLowerCase().includes(searching) ||
-                blog.description.toLowerCase().includes(searching) ||
-                blog.username.toLowerCase().includes(searching)
-            )
-            .map((data) => (
-              <CustomLink to={`/blog/${data._id}`}>
-                <BlogCard key={nanoid()}>
-                  <img src={data.imageURL} alt="Dummy trial" />
-                  <div className="card-body">
-                    <span>
-                      <h4>{data.title.substring(0, 70) + ".."}</h4>
-                      <p className="description">
-                        {width > 500 &&
-                          data.description.substring(0, 200) + ".."}
-                      </p>
-                      <div className="tag-container">
-                        {data.tags.map((tag) => (
-                          <p key={tag.name} className="tags">
-                            {tag}
+      {usersLoading || blogsLoading ? (
+        <Loader />
+      ) : (
+        <Fragment>
+          <div class="search-container">
+            <SearchField
+              onChange={(e) => handleSearch(e)}
+              size="large"
+              placeholder="Search blogs users or tags"
+              type="text"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="end">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+              variant="outlined"
+            />{" "}
+          </div>
+          <HomeContainer>
+            <BlogContainer>
+              {allBlogs
+                .filter(
+                  (blog) =>
+                    blog.title.toLowerCase().includes(searching) ||
+                    blog.description.toLowerCase().includes(searching) ||
+                    blog.username.toLowerCase().includes(searching)
+                )
+                .map((data) => (
+                  <CustomLink to={`/blog/${data._id}`}>
+                    <BlogCard key={nanoid()}>
+                      <img src={data.imageURL} alt="Dummy trial" />
+                      <div className="card-body">
+                        <span>
+                          <h4>{data.title.substring(0, 70) + ".."}</h4>
+                          <p className="description">
+                            {width > 500 &&
+                              data.description.substring(0, 200) + ".."}
                           </p>
-                        ))}
+                          <div className="tag-container">
+                            {data.tags.map((tag) => (
+                              <p key={tag.name} className="tags">
+                                {tag}
+                              </p>
+                            ))}
+                          </div>
+                        </span>
+                        <span>
+                          <FlexBox style={{ alignSelf: "center" }}>
+                            <img
+                              className="profile"
+                              src={data.profileURL}
+                              alt={data.username}
+                            />
+
+                            <div>
+                              <div className="by">{data.username}</div>
+                              <BlogTime blogTimeVariable={data.time} />
+                            </div>
+                          </FlexBox>
+                        </span>
                       </div>
-                    </span>
-                    <span>
-                      <FlexBox style={{ alignSelf: "center" }}>
+                    </BlogCard>
+                  </CustomLink>
+                ))}
+            </BlogContainer>
+            <PeopleContainer>
+              <Typography variant="h5">
+                Follow Users to see their blogs on yout feed
+              </Typography>
+              <div className="People-Card">
+                {allUsers?.map((userItem) => {
+                  return (
+                    <UserCard key={userItem._id}>
+                      <CustomLink to={`/user/${userItem.username}`}>
                         <img
                           className="profile"
-                          src={data.profileURL}
-                          alt={data.username}
+                          src={userItem?.profileURL}
+                          alt={userItem.username}
                         />
-
-                        <div>
-                          <div className="by">{data.username}</div>
-                          <BlogTime blogTimeVariable={data.time} />
+                      </CustomLink>
+                      <CustomLink to={`/user/${userItem.username}`}>
+                        <div className="user-info">
+                          <span className="username"> {userItem.username}</span>
+                          <span className="email"> {userItem.email}</span>
                         </div>
-                      </FlexBox>
-                    </span>
-                  </div>
-                </BlogCard>
-              </CustomLink>
-            ))}
-        </BlogContainer>
-        <PeopleContainer>
-          <Typography variant="h5">
-            Follow Users to see their blogs on yout feed
-          </Typography>
-          <div className="People-Card">
-            {allUsers?.map((userItem) => {
-              return (
-                <UserCard key={userItem._id}>
-                  <CustomLink to={`/user/${userItem.username}`}>
-                    <img
-                      className="profile"
-                      src={userItem?.profileURL}
-                      alt={userItem.username}
-                    />
-                  </CustomLink>
-                  <CustomLink to={`/user/${userItem.username}`}>
-                    <div className="user-info">
-                      <span className="username"> {userItem.username}</span>
-                      <span className="email"> {userItem.email}</span>
-                    </div>
-                  </CustomLink>
+                      </CustomLink>
 
-                  <div className="follow">
-                    <UserIcon
-                      HandleFollowUser={HandleFollowUser}
-                      userItem={userItem}
-                    />
-                  </div>
-                </UserCard>
-              );
-            })}
-          </div>
-        </PeopleContainer>
-      </HomeContainer>
+                      <div className="follow">
+                        <UserIcon
+                          HandleFollowUser={HandleFollowUser}
+                          userItem={userItem}
+                        />
+                      </div>
+                    </UserCard>
+                  );
+                })}
+              </div>
+            </PeopleContainer>
+          </HomeContainer>
+        </Fragment>
+      )}
     </TopContainer>
   );
 };

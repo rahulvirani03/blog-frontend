@@ -1,12 +1,18 @@
 import { Typography } from "@material-ui/core";
-import React, { useEffect } from "react";
+import React, { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { BlogTime } from "../../Components/BlogTime";
 import { CustomLink, FlexBox } from "../../Components/Common";
+import { Loader } from "../../Components/Loader";
 import { getUser } from "../../Reducers/authSlice";
-import { fetchSingleBlogs, getSingleBlog } from "../../Reducers/blogSlice";
+
+import {
+  fetchSingleBlogs,
+  getBlogsLoading,
+  getSingleBlog,
+} from "../../Reducers/blogSlice";
 import { fetchAllUsers, getAllUsers } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
 import { maxWidth, borderRadius } from "../../Utils/constants";
@@ -105,6 +111,7 @@ const TagContainer = styled.div`
   }
 `;
 export const Post = () => {
+  const postLoading = useSelector(getBlogsLoading);
   const location = useLocation();
   const dispatch = useDispatch();
   const postPath = location.pathname;
@@ -140,45 +147,55 @@ export const Post = () => {
   }
 
   return (
-    <PostContainer>
-      <TitleContainer>
-        <TitleTypo variant="h4">{data.title}</TitleTypo>
-        <FlexBox
-          style={{
-            alignSelf: "center",
-            alignItems: "center",
-            margin: "auto",
-            padding: ".5em 0",
-          }}
-        >
-          <img className="profile" src={data.profileURL} alt="userprofile" />
-          <div>
-            <CustomLink to={`/user/${data.username}`}>
-              {" "}
-              <div className="by">{data.username}</div>
-            </CustomLink>
-            <span style={{ marginLeft: "10px" }}>
-              {" "}
-              <BlogTime blogTimeVariable={data.time} />
-            </span>
-          </div>
-        </FlexBox>
-      </TitleContainer>
-      <PostImageContainer>
-        <img class="cover" src={data.imageURL} alt="someimage" />
-      </PostImageContainer>
-      <TagContainer>
-        <div className="border-top"></div>
-        <div className="another-container">
-          <Typography>Tags:</Typography>
-          {data.tags?.map((tag) => {
-            return <div className="tags">{tag}</div>;
-          })}
-        </div>
-      </TagContainer>
-      <DescriptionContainer>
-        <div className="border-top">{data.description}</div>
-      </DescriptionContainer>
-    </PostContainer>
+    <Fragment>
+      {postLoading ? (
+        <Loader />
+      ) : (
+        <PostContainer>
+          <TitleContainer>
+            <TitleTypo variant="h4">{data.title}</TitleTypo>
+            <FlexBox
+              style={{
+                alignSelf: "center",
+                alignItems: "center",
+                margin: "auto",
+                padding: ".5em 0",
+              }}
+            >
+              <img
+                className="profile"
+                src={data.profileURL}
+                alt="userprofile"
+              />
+              <div>
+                <CustomLink to={`/user/${data.username}`}>
+                  {" "}
+                  <div className="by">{data.username}</div>
+                </CustomLink>
+                <span style={{ marginLeft: "10px" }}>
+                  {" "}
+                  <BlogTime blogTimeVariable={data.time} />
+                </span>
+              </div>
+            </FlexBox>
+          </TitleContainer>
+          <PostImageContainer>
+            <img class="cover" src={data.imageURL} alt="someimage" />
+          </PostImageContainer>
+          <TagContainer>
+            <div className="border-top"></div>
+            <div className="another-container">
+              <Typography>Tags:</Typography>
+              {data.tags?.map((tag) => {
+                return <div className="tags">{tag}</div>;
+              })}
+            </div>
+          </TagContainer>
+          <DescriptionContainer>
+            <div className="border-top">{data.description}</div>
+          </DescriptionContainer>
+        </PostContainer>
+      )}
+    </Fragment>
   );
 };

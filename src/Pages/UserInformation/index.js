@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -20,9 +20,11 @@ import {
   getSingleUser,
   fetchSingleUser,
   followUser,
+  getUsersLoading,
 } from "../../Reducers/userSlice";
 import { getUser } from "../../Reducers/authSlice";
 import { fetchUserBlogs, getSingleUserBlogs } from "../../Reducers/blogSlice";
+import { Loader } from "../../Components/Loader";
 
 const CustomContainer = styled(Container)`
   width: 80%;
@@ -246,6 +248,7 @@ const UserIcon = ({ temp, setTemp, user, follows }) => {
 export const UserInformation = () => {
   let follows = false;
   const [temp, setTemp] = useState(false);
+  const usersLoading = useSelector(getUsersLoading);
   const location = useLocation();
   const dispatch = useDispatch();
   const userPath = location.pathname;
@@ -268,99 +271,105 @@ export const UserInformation = () => {
     dispatch(fetchUserBlogs(username));
   }, [dispatch, username]);
   return (
-    <ProfilePageContainer>
-      <CustomContainer>
-        <Typography
-          variant="h5"
-          style={{ textDecoration: "underline", color: `${primary}` }}
-        >
-          User Information
-        </Typography>
-        <ProfileInfoContainer>
-          <ProfilePicture>
-            {user.profileURL && (
-              <img
-                className="profile-img"
-                alt="prifle"
-                src={user?.profileURL}
-              />
-            )}
-          </ProfilePicture>
+    <Fragment>
+      {usersLoading ? (
+        <Loader />
+      ) : (
+        <ProfilePageContainer>
+          <CustomContainer>
+            <Typography
+              variant="h5"
+              style={{ textDecoration: "underline", color: `${primary}` }}
+            >
+              User Information
+            </Typography>
+            <ProfileInfoContainer>
+              <ProfilePicture>
+                {user.profileURL && (
+                  <img
+                    className="profile-img"
+                    alt="prifle"
+                    src={user?.profileURL}
+                  />
+                )}
+              </ProfilePicture>
 
-          <InformationCotainer>
-            <Spacer />
-            <InputField
-              type="email"
-              disabled={true}
-              value={user.email}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email />
-                  </InputAdornment>
-                ),
-              }}
-              variant="standard"
-            />
-            <Spacer />
-            <InputField
-              type="text"
-              disabled={true}
-              value={user.username}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person />
-                  </InputAdornment>
-                ),
-              }}
-              variant="standard"
-            />
-            <Spacer />
-            <UserIcon
-              temp={temp}
-              user={singleUser}
-              setTemp={setTemp}
-              follows={follows}
-            />
-            <Spacer />
-          </InformationCotainer>
-        </ProfileInfoContainer>
-      </CustomContainer>
+              <InformationCotainer>
+                <Spacer />
+                <InputField
+                  type="email"
+                  disabled={true}
+                  value={user.email}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="standard"
+                />
+                <Spacer />
+                <InputField
+                  type="text"
+                  disabled={true}
+                  value={user.username}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="standard"
+                />
+                <Spacer />
+                <UserIcon
+                  temp={temp}
+                  user={singleUser}
+                  setTemp={setTemp}
+                  follows={follows}
+                />
+                <Spacer />
+              </InformationCotainer>
+            </ProfileInfoContainer>
+          </CustomContainer>
 
-      <BlogContainer>
-        <Typography
-          variant="h5"
-          style={{ textDecoration: "underline", color: `${primary}` }}
-        >
-          Blogs
-        </Typography>
+          <BlogContainer>
+            <Typography
+              variant="h5"
+              style={{ textDecoration: "underline", color: `${primary}` }}
+            >
+              Blogs
+            </Typography>
 
-        <BlogGrid>
-          {userBlogs.map((blog) => {
-            return (
-              <div className="blog-card">
-                <CustomLink to={`/blog/${blog._id}`}>
-                  <>
-                    <img src={blog.imageURL} alt={blog.title} />
-                    <p>{blog.title.substr(0, 30) + ".."}</p>
-                    <div className="tag-container">
-                      {blog.tags.map((tag) => (
-                        <p className="tags">{tag}</p>
-                      ))}
-                    </div>
-                    <p className="description">
-                      {blog.description.substr(0, 80) + "..."}
-                    </p>
-                  </>
-                </CustomLink>
+            <BlogGrid>
+              {userBlogs.map((blog) => {
+                return (
+                  <div className="blog-card">
+                    <CustomLink to={`/blog/${blog._id}`}>
+                      <>
+                        <img src={blog.imageURL} alt={blog.title} />
+                        <p>{blog.title.substr(0, 30) + ".."}</p>
+                        <div className="tag-container">
+                          {blog.tags.map((tag) => (
+                            <p className="tags">{tag}</p>
+                          ))}
+                        </div>
+                        <p className="description">
+                          {blog.description.substr(0, 80) + "..."}
+                        </p>
+                      </>
+                    </CustomLink>
 
-                <BlogTime blogTimeVariable={blog.time} />
-              </div>
-            );
-          })}
-        </BlogGrid>
-      </BlogContainer>
-    </ProfilePageContainer>
+                    <BlogTime blogTimeVariable={blog.time} />
+                  </div>
+                );
+              })}
+            </BlogGrid>
+          </BlogContainer>
+        </ProfilePageContainer>
+      )}
+    </Fragment>
   );
 };

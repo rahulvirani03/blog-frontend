@@ -190,6 +190,6 @@ const blogSlice = createSlice({
 export const getSingleBlog = (state) => state.blog.singleBlog;
 export const getMyBlogs = (state) => state.blog.myBlog;
 export const getAllBlogs = (state) => state.blog.allBlogs;
-export const getBlogLoading = (state) => state.blog.loading;
+export const getBlogsLoading = (state) => state.blog.loading;
 export const getSingleUserBlogs = (state) => state.blog.singleUserBlogs;
 export default blogSlice.reducer;

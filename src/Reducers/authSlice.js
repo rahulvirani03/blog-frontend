@@ -113,6 +113,14 @@ const authSlice = createSlice({
         };
       },
     },
+    logoutUser: {
+      reducer(state, action) {
+        state.user = null;
+        state.profileUser = null;
+        localStorage.removeItem("token");
+        localStorage.removeItem("User");
+      },
+    },
   },
   extraReducers(builder) {
     builder
@@ -174,13 +182,15 @@ const authSlice = createSlice({
         state.profileUser.profileURL = action.payload.data.user.profileURL;
       })
       .addCase(setProfileImage.rejected, (state, action) => {
-        state.loading = true;
+        state.loading = false;
       })
       .addCase(fetchProfileInfo.pending, (state, action) => {
         state.loading = true;
       })
       .addCase(fetchProfileInfo.fulfilled, (state, action) => {
+        console.log("herer");
         state.loading = false;
+        console.log(action.payload.data);
         state.profileUser = action.payload.data;
       })
       .addCase(fetchProfileInfo.rejected, (state, action) => {
@@ -192,5 +202,5 @@ const authSlice = createSlice({
 export const getUser = (state) => state.auth.user;
 export const getUserLoading = (state) => state.auth.loading;
 export const getProfileUser = (state) => state.auth.profileUser;
-export const { setUser } = authSlice.actions;
+export const { setUser, logoutUser } = authSlice.actions;
 export default authSlice.reducer;

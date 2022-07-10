@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProfileInfo,
   getProfileUser,
+  getUserLoading,
+  logoutUser,
   setProfileImage,
 } from "../../Reducers/authSlice";
 import {
@@ -31,6 +33,8 @@ import {
   getFollowing,
 } from "../../Reducers/userSlice";
 import { parseISO, formatDistanceToNow } from "date-fns";
+import { Loader } from "../../Components/Loader";
+import { useNavigate } from "react-router-dom";
 
 const CustomContainer = styled(Container)`
   width: 80%;
@@ -374,6 +378,10 @@ const BlogTime = ({ blogTimeVariable }) => {
 };
 export const UserProfile = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const authLoading = useSelector(getUserLoading);
+
+  console.log("Auth loading" + authLoading);
   const [showModal, setShowModal] = useState(false);
   const [selected, setSelected] = useState(false);
   const myblogs = useSelector(getMyBlogs);
@@ -389,162 +397,181 @@ export const UserProfile = () => {
     dispatch(fetchProfileInfo());
   }, [dispatch]);
 
+  const logout = () => {
+    const res = dispatch(logoutUser());
+    console.log(res);
+    navigate("/landing");
+  };
+
   return (
-    <ProfilePageContainer>
-      {showModal && (
-        <FollowingFollowerModal
-          selected={selected}
-          followersList={followersList}
-          followingList={followingList}
-          setShowModal={setShowModal}
-        />
-      )}
-      <CustomContainer>
-        <Typography
-          variant="h5"
-          style={{ textDecoration: "underline", color: `${primary}` }}
-        >
-          Profile Information
-        </Typography>
-        <ProfileInfoContainer>
-          <ProfilePicture>
-            {user.profileURL && (
-              <img
-                className="profile-img"
-                alt="prifle"
-                src={user?.profileURL}
-              />
-            )}
-
-            <div className="edit-button">
-              <input
-                onChange={(e) => handleFileSelect(e)}
-                className="file-upload"
-                type="file"
-              />
-              <EditOutlined />
-            </div>
-          </ProfilePicture>
-
-          <InformationCotainer>
-            <Spacer />
-            <InputField
-              label="Email"
-              type="email"
-              disabled={changed}
-              value={user.email}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email />
-                  </InputAdornment>
-                ),
-              }}
-              variant="outlined"
+    <Fragment>
+      {authLoading ? (
+        <Loader />
+      ) : (
+        <ProfilePageContainer>
+          {showModal && (
+            <FollowingFollowerModal
+              selected={selected}
+              followersList={followersList}
+              followingList={followingList}
+              setShowModal={setShowModal}
             />
-            <Spacer />
-            <InputField
-              label="Username"
-              type="text"
-              disabled={changed}
-              value={user.username}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person />
-                  </InputAdornment>
-                ),
-              }}
-              variant="outlined"
-            />
-            <Spacer />
-            <CustomButton
-              onClick={() => setChanged(false)}
-              style={{ height: "3em" }}
+          )}
+          <CustomContainer>
+            <Typography
+              variant="h5"
+              style={{ textDecoration: "underline", color: `${primary}` }}
             >
-              {changed ? "Edit" : "Save"}
-            </CustomButton>
-            <Spacer />
-          </InformationCotainer>
-        </ProfileInfoContainer>
-        <UsersContainer>
-          <div className="items">
-            <span className="title">Blogs</span>
-            <span className="number">12</span>
-          </div>
-          <div className="items">
-            <span
-              onClick={() => {
-                dispatch(fetchFollowers());
-                setShowModal(true);
-                setSelected(true);
-              }}
-              className="title"
-            >
-              Followers
-            </span>
-            <span className="number">
-              {user.followedBy ? user.followedBy.length : 0}
-            </span>
-          </div>
-          <div className="items">
-            <span
-              onClick={() => {
-                dispatch(fetchFollowing());
-                setShowModal(true);
-                setSelected(false);
-              }}
-              className="title"
-            >
-              Following
-            </span>
-            <span className="number">
-              {" "}
-              {user.follows ? user.follows.length : 0}
-            </span>
-          </div>
-        </UsersContainer>
-      </CustomContainer>
-      <AddBlogContainer>
-        <Divider />
-        <CustomLink to="/create-blog">
-          <CustomButton style={{ height: "3em" }}>Add Blog</CustomButton>
-        </CustomLink>
-        <Divider />
-      </AddBlogContainer>
-      <BlogContainer>
-        <Typography
-          variant="h5"
-          style={{ textDecoration: "underline", color: `${primary}` }}
-        >
-          Blogs
-        </Typography>
+              Profile Information
+            </Typography>
+            <ProfileInfoContainer>
+              <ProfilePicture>
+                {user?.profileURL && (
+                  <img
+                    className="profile-img"
+                    alt="prifle"
+                    src={user?.profileURL}
+                  />
+                )}
 
-        <BlogGrid>
-          {myblogs.map((blog) => {
-            return (
-              <div className="blog-card">
-                <CustomLink to={`/blog/${blog._id}`}>
-                  <>
-                    <img src={blog.imageURL} alt={blog.title} />
-                    <p>{blog.title.substr(0, 30) + ".."}</p>
-                    <div className="tag-container">
-                      {blog.tags.map((tag) => (
-                        <p className="tags">{tag}</p>
-                      ))}
-                    </div>
-                    <p className="description">
-                      {blog.description.substr(0, 100) + "..."}
-                    </p>
-                  </>
-                </CustomLink>
+                <div className="edit-button">
+                  <input
+                    onChange={(e) => handleFileSelect(e)}
+                    className="file-upload"
+                    type="file"
+                  />
+                  <EditOutlined />
+                </div>
+              </ProfilePicture>
 
-                <BlogTime blogTimeVariable={blog.time} />
+              <InformationCotainer>
+                <Spacer />
+                <InputField
+                  label="Email"
+                  type="email"
+                  disabled={changed}
+                  value={user?.email}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+                <Spacer />
+                <InputField
+                  label="Username"
+                  type="text"
+                  disabled={changed}
+                  value={user?.username}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person />
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                />
+                <Spacer />
+                <CustomButton
+                  onClick={() => setChanged(false)}
+                  style={{ height: "3em" }}
+                >
+                  {changed ? "Edit" : "Save"}
+                </CustomButton>
+                <Spacer />
+                <CustomButton
+                  onClick={() => logout()}
+                  style={{ backgroundColor: "#690000", height: "3em" }}
+                >
+                  Logout
+                </CustomButton>
+                <Spacer />
+              </InformationCotainer>
+            </ProfileInfoContainer>
+            <UsersContainer>
+              <div className="items">
+                <span className="title">Blogs</span>
+                <span className="number">{myblogs.length}</span>
               </div>
-            );
-          })}
-        </BlogGrid>
-      </BlogContainer>
-    </ProfilePageContainer>
+              <div className="items">
+                <span
+                  onClick={() => {
+                    dispatch(fetchFollowers());
+                    setShowModal(true);
+                    setSelected(true);
+                  }}
+                  className="title"
+                >
+                  Followers
+                </span>
+                <span className="number">
+                  {user?.followedBy ? user.followedBy.length : 0}
+                </span>
+              </div>
+              <div className="items">
+                <span
+                  onClick={() => {
+                    dispatch(fetchFollowing());
+                    setShowModal(true);
+                    setSelected(false);
+                  }}
+                  className="title"
+                >
+                  Following
+                </span>
+                <span className="number">
+                  {" "}
+                  {user?.follows ? user.follows.length : 0}
+                </span>
+              </div>
+            </UsersContainer>
+          </CustomContainer>
+          <AddBlogContainer>
+            <Divider />
+            <CustomLink to="/create-blog">
+              <CustomButton style={{ height: "3em" }}>Add Blog</CustomButton>
+            </CustomLink>
+            <Divider />
+          </AddBlogContainer>
+          <BlogContainer>
+            <Typography
+              variant="h5"
+              style={{ textDecoration: "underline", color: `${primary}` }}
+            >
+              Blogs
+            </Typography>
+
+            <BlogGrid>
+              {myblogs.map((blog) => {
+                return (
+                  <div className="blog-card">
+                    <CustomLink to={`/blog/${blog._id}`}>
+                      <>
+                        <img src={blog.imageURL} alt={blog.title} />
+                        <p>{blog.title.substr(0, 30) + ".."}</p>
+                        <div className="tag-container">
+                          {blog.tags.map((tag) => (
+                            <p className="tags">{tag}</p>
+                          ))}
+                        </div>
+                        <p className="description">
+                          {blog.description.substr(0, 100) + "..."}
+                        </p>
+                      </>
+                    </CustomLink>
+
+                    <BlogTime blogTimeVariable={blog.time} />
+                  </div>
+                );
+              })}
+            </BlogGrid>
+          </BlogContainer>
+        </ProfilePageContainer>
+      )}
+    </Fragment>
   );
 };

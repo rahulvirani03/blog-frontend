@@ -30,7 +30,7 @@ export const Navbar = () => {
         <CustomNavBar edge="start" color="inherit" aria-label="menu">
           <CustomLink to="/">
             <Typography variant="h6" style={{ textDecoration: "underline" }}>
-              Blog
+              React-Blog
             </Typography>
           </CustomLink>
           <Box>
