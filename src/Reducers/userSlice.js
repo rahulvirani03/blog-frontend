@@ -81,7 +81,7 @@ export const fetchSingleUser = createAsyncThunk(
   async (username) => {
     try {
       console.log({ username });
-      const result = await api.post("/users/get-single-user", { username });
+      const result = await api.post("/get-single-user", { username });
       return result;
     } catch (err) {
       return err;

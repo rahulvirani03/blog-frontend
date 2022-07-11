@@ -75,7 +75,7 @@ export const fetchSingleBlogs = createAsyncThunk(
   "/blogs/single-blog",
   async ({ id }) => {
     try {
-      const res = await api.post("/blog/get-single-blog", { id });
+      const res = await api.post("/get-single-blog", { id });
       return res;
     } catch (err) {
       return err;

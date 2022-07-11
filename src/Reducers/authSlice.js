@@ -17,7 +17,6 @@ export const loginUser = createAsyncThunk(
   async ({ username, password }) => {
     try {
       const response = await api.post("/auth/login", { username, password });
-      console.log(response);
       return response;
     } catch (err) {
       return err;
@@ -34,7 +33,6 @@ export const signUpUser = createAsyncThunk(
         username,
         password,
       });
-      console.log(response);
       return response;
     } catch (err) {
       return err;
@@ -47,7 +45,6 @@ export const authenticateUser = createAsyncThunk(
   async () => {
     try {
       const header = localStorage.getItem("token");
-      console.log({ header });
       const result = await api.get("/auth/token", {
         headers: { authorization: header },
       });
@@ -161,6 +158,7 @@ const authSlice = createSlice({
       })
       .addCase(authenticateUser.fulfilled, (state, action) => {
         state.loading = false;
+
         console.log(action.payload);
         if (!action.payload.valid) {
           // localStorage.removeItem("token");
@@ -188,7 +186,6 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchProfileInfo.fulfilled, (state, action) => {
-        console.log("herer");
         state.loading = false;
         console.log(action.payload.data);
         state.profileUser = action.payload.data;

@@ -29,11 +29,12 @@ import {
 } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
 import { maxWidth, borderRadius, boxShadow } from "../../Utils/constants";
-import useWindowDimensions from "./windowDimension";
+import useWindowDimensions from "../../Components/windowDimension";
 
 const TopContainer = styled.div`
   max-width: ${maxWidth};
   padding: 1em;
+  width: 95%;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
@@ -52,7 +53,7 @@ const TopContainer = styled.div`
 `;
 const HomeContainer = styled.div`
   display: flex;
-  width: 99%;
+  min-width: 99%;
   margin-top: 1em;
   padding: 0 0.5em;
   gap: 2%;
@@ -68,12 +69,12 @@ const SearchField = styled(InputField)`
   margin: 0 auto;
 `;
 const BlogContainer = styled.div`
-  width: 67%;
+  min-width: 67%;
   border-radius: ${borderRadius};
   padding: 1em;
   flex-direction: column;
   display: flex;
-  justify-content: center;
+
   box-shadow: ${boxShadow};
   @media screen and (max-width: 950px) {
     margin: 0 auto;
@@ -123,11 +124,11 @@ const BlogCard = styled.div`
       width: 100%;
       object-fit: cover;
     }
-    h4 {
-      font-size: 30px;
+    .title {
+      font-size: 25px;
       padding: 0;
       margin: 0px;
-      color: ${primary};
+      color: black;
       @media screen and (max-width: 550px) {
         font-size: 20px;
       }
@@ -286,7 +287,6 @@ export const Home = () => {
   const [searching, setSearching] = useState("");
   const { width } = useWindowDimensions();
   const user = localStorage.getItem("User");
-  console.log("User is " + user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const allBlogs = useSelector(getAllBlogs);
@@ -367,7 +367,9 @@ export const Home = () => {
                       <img src={data.imageURL} alt="Dummy trial" />
                       <div className="card-body">
                         <span>
-                          <h4>{data.title.substring(0, 70) + ".."}</h4>
+                          <h5 className="title">
+                            {data.title.substring(0, 70) + ".."}
+                          </h5>
                           <p className="description">
                             {width > 500 &&
                               data.description.substring(0, 200) + ".."}

@@ -1,0 +1,21 @@
+.slide {
+  opacity: 0;
+  transition-duration: 1s ease;
+}
+.slide-active {
+  opacity: 1;
+  transition-duration: 1s;
+}
+
+.image {
+  width: inherit;
+  height: 400px;
+}
+
+.slider {
+  position: relative;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
