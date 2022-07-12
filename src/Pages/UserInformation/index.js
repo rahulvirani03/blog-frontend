@@ -197,7 +197,6 @@ const BlogTime = ({ blogTimeVariable }) => {
   let timeAgo = "";
   if (blogTimeVariable) {
     const date = parseISO(blogTimeVariable);
-    console.log(date);
     const timePeriod = formatDistanceToNow(date);
     timeAgo = `${timePeriod} ago`;
   }
@@ -257,8 +256,6 @@ export const UserInformation = () => {
   const localUser = useSelector(getUser);
   const singleUser = useSelector(getSingleUser);
   const userBlogs = useSelector(getSingleUserBlogs);
-  console.log(userBlogs);
-  console.log({ singleUser });
 
   localUser.follows.forEach((id) => {
     if (id === singleUser._id) {

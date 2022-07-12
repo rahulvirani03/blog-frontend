@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../api";
-
 let localUser;
 if (localStorage.getItem("User") !== "undefined") {
   localUser = JSON.parse(localStorage.getItem("User"));
@@ -9,7 +8,7 @@ if (localStorage.getItem("User") !== "undefined") {
 const initialState = {
   user: localUser,
   profileUser: {},
-  error: "",
+  error: false,
   loading: true,
 };
 export const loginUser = createAsyncThunk(
@@ -73,7 +72,6 @@ export const setProfileImage = createAsyncThunk(
       const formData = new FormData();
       const file = imageFile;
       const fileName = imageFile.name;
-      console.log(id);
       formData.append("file", file);
       formData.append("fileName", fileName);
       formData.append("id", id);
@@ -96,7 +94,6 @@ const authSlice = createSlice({
   reducers: {
     setUser: {
       reducer(state, action) {
-        console.log(action.payload);
         state.user = action.payload;
       },
       prepare(user) {
@@ -126,7 +123,6 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload);
         localStorage.setItem("token", action.payload.data.token);
         localStorage.setItem(
           "User",
@@ -142,7 +138,6 @@ const authSlice = createSlice({
       })
       .addCase(signUpUser.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload);
         localStorage.setItem("token", action.payload.data.token);
         localStorage.setItem(
           "User",
@@ -158,12 +153,15 @@ const authSlice = createSlice({
       })
       .addCase(authenticateUser.fulfilled, (state, action) => {
         state.loading = false;
-
-        console.log(action.payload);
+        console.log(action.payload.valid);
         if (!action.payload.valid) {
-          // localStorage.removeItem("token");
-          //localStorage.setItem("User");
-          //  state.user = null;
+          localStorage.removeItem("token");
+          console.log("User not present");
+          localStorage.removeItem("User");
+          state.user = null;
+          state.error = true;
+        } else {
+          state.user = action.payload.user;
         }
       })
       .addCase(authenticateUser.rejected, (state, action) => {
@@ -174,7 +172,7 @@ const authSlice = createSlice({
       })
       .addCase(setProfileImage.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload.data.user);
+
         localStorage.setItem("User", JSON.stringify(action.payload.data.user));
         state.user = action.payload.data.user;
         state.profileUser.profileURL = action.payload.data.user.profileURL;
@@ -187,7 +185,6 @@ const authSlice = createSlice({
       })
       .addCase(fetchProfileInfo.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload.data);
         state.profileUser = action.payload.data;
       })
       .addCase(fetchProfileInfo.rejected, (state, action) => {
@@ -199,5 +196,6 @@ const authSlice = createSlice({
 export const getUser = (state) => state.auth.user;
 export const getUserLoading = (state) => state.auth.loading;
 export const getProfileUser = (state) => state.auth.profileUser;
+export const getAuthError = (state) => state.auth.error;
 export const { setUser, logoutUser } = authSlice.actions;
 export default authSlice.reducer;

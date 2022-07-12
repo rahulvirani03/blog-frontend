@@ -11,7 +11,7 @@ import {
   Spacer,
 } from "../../Components/Common";
 import { useDispatch, useSelector } from "react-redux";
-import { createBlog, getBlogsLoading } from "../../Reducers/blogSlice";
+import { createBlog, getCreateBlogLoading } from "../../Reducers/blogSlice";
 import { useNavigate } from "react-router-dom";
 import categoryArray from "../../Utils/categorys";
 import { Loader } from "../../Components/Loader";
@@ -53,7 +53,7 @@ export const CreateBlog = () => {
   const navigate = useNavigate();
   const formData = new FormData();
   const dispatch = useDispatch();
-  const loading = useSelector(getBlogsLoading);
+  const loading = useSelector(getCreateBlogLoading);
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
   const [tags, setTags] = useState([]);
@@ -62,14 +62,12 @@ export const CreateBlog = () => {
   const [global, setGlobal] = useState(true);
 
   const handleCategoryChange = (e) => {
-    console.log(e);
     setTags((prev) => e);
   };
 
   const handleImageUpload = (e) => {
     const imageFile = e.target.files[0];
     setImageFile(imageFile);
-    console.log({ imageFile });
     formData.append("file", imageFile);
     setBlogImage(URL.createObjectURL(imageFile));
   };
@@ -79,18 +77,14 @@ export const CreateBlog = () => {
     tags.forEach((tag) => {
       tagValue.push(tag.value);
     });
-    console.log(tagValue);
-    const res = await dispatch(
+    await dispatch(
       createBlog({ title, description, tagValue, formimageFile, global })
     );
-    console.log(res);
+
     navigate("/user-profile");
   };
 
-  useEffect(() => {
-    console.log(global);
-    // makeCategoriesArray();
-  }, [global]);
+  useEffect(() => {}, [global]);
   return (
     <Fragment>
       {loading ? (

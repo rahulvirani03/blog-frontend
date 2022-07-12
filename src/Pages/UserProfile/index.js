@@ -362,11 +362,10 @@ const FollowingFollowerModal = ({
   );
 };
 const BlogTime = ({ blogTimeVariable }) => {
-  console.log(blogTimeVariable);
   let timeAgo = "";
   if (blogTimeVariable) {
     const date = parseISO(blogTimeVariable);
-    console.log(date);
+
     const timePeriod = formatDistanceToNow(date);
     timeAgo = `${timePeriod} ago`;
   }
@@ -381,7 +380,6 @@ export const UserProfile = () => {
   const navigate = useNavigate();
   const authLoading = useSelector(getUserLoading);
 
-  console.log("Auth loading" + authLoading);
   const [showModal, setShowModal] = useState(false);
   const [selected, setSelected] = useState(false);
   const myblogs = useSelector(getMyBlogs);
@@ -398,8 +396,7 @@ export const UserProfile = () => {
   }, [dispatch]);
 
   const logout = () => {
-    const res = dispatch(logoutUser());
-    console.log(res);
+    dispatch(logoutUser());
     navigate("/landing");
   };
 

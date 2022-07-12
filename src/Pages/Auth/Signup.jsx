@@ -20,9 +20,7 @@ export const Signup = () => {
   const [password, setPassword] = useState();
 
   const handleSignup = async () => {
-    console.log(email, username, password);
     const result = await dispatch(signUpUser({ email, username, password }));
-    console.log(result.payload.payload);
     if (result.payload.data.message === "Success") {
       navigate("/");
     }

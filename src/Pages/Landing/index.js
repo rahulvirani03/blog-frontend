@@ -168,7 +168,6 @@ const Landing = () => {
 
   const getLatestBlogs = async () => {
     const res = await api.get("/latest-blogs");
-    console.log(res.data);
     setBlogs(res.data);
   };
 

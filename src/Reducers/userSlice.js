@@ -20,7 +20,6 @@ export const fetchAllUsers = createAsyncThunk(
       });
       return result;
     } catch (err) {
-      console.log(err);
       return err;
     }
   }
@@ -35,7 +34,6 @@ export const fetchUnfollowedUsers = createAsyncThunk(
       });
       return result;
     } catch (err) {
-      console.log(err);
       return err;
     }
   }
@@ -44,7 +42,6 @@ export const followUser = createAsyncThunk(
   "users-follow-user",
   async (otherUser) => {
     try {
-      console.log({ otherUser });
       const result = await api.post("/users/follow-user", { otherUser });
       return result;
     } catch (err) {
@@ -56,7 +53,6 @@ export const fetchFollowing = createAsyncThunk(
   "get-following",
   async (otherUser) => {
     try {
-      console.log({ otherUser });
       const result = await api.get("/users/get-following");
       return result;
     } catch (err) {
@@ -68,7 +64,6 @@ export const fetchFollowers = createAsyncThunk(
   "get-followers",
   async (otherUser) => {
     try {
-      console.log({ otherUser });
       const result = await api.get("/users/get-followers");
       return result;
     } catch (err) {
@@ -80,8 +75,7 @@ export const fetchSingleUser = createAsyncThunk(
   "fetch-single-user",
   async (username) => {
     try {
-      console.log({ username });
-      const result = await api.post("/get-single-user", { username });
+      const result = await api.post("/users/get-single-user", { username });
       return result;
     } catch (err) {
       return err;
@@ -95,7 +89,6 @@ const userSlice = createSlice({
   reducers: {
     setAllUsers: {
       reducer(state, action) {
-        console.log(action);
         state.allUsers = action.payload;
       },
     },

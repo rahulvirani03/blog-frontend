@@ -17,7 +17,7 @@ import { authenticateUser } from "../../Reducers/authSlice";
 import {
   fetchAllBlogs,
   getAllBlogs,
-  getBlogsLoading,
+  getAllBlogsLoading,
 } from "../../Reducers/blogSlice";
 import {
   fetchAllUsers,
@@ -283,7 +283,8 @@ const UserIcon = ({ userItem, HandleFollowUser }) => {
 
 export const Home = () => {
   const usersLoading = useSelector(getUsersLoading);
-  const blogsLoading = useSelector(getBlogsLoading);
+  const blogsLoading = useSelector(getAllBlogsLoading);
+
   const [searching, setSearching] = useState("");
   const { width } = useWindowDimensions();
   const user = localStorage.getItem("User");
@@ -295,7 +296,6 @@ export const Home = () => {
   useEffect(() => {
     dispatch(authenticateUser());
   }, [dispatch]);
-
   useEffect(() => {
     if (!user) {
       navigate("/landing");
@@ -332,6 +332,7 @@ export const Home = () => {
 
   return (
     <TopContainer>
+      {/* {false ? ( */}
       {usersLoading || blogsLoading ? (
         <Loader />
       ) : (

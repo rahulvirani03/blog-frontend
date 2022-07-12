@@ -8,9 +8,7 @@ export const ImageSlider = () => {
   const [current, setCurrent] = useState(0);
   const carouselArray = [carousel1, carousel2, carousel3];
 
-  useEffect(() => {
-    console.log(current);
-  }, [current]);
+  useEffect(() => {}, [current]);
 
   useEffect(() => {
     const id = setTimeout(

@@ -1,9 +1,7 @@
 import { Box } from "@material-ui/core";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { CustomCard } from "../../Components/Common";
-import { getUser, getUserLoading } from "../../Reducers/authSlice";
 import { primary } from "../../Utils/colors";
 import { Login } from "./Login";
 import { Signup } from "./Signup";
@@ -14,6 +12,10 @@ const AuthContainer = styled(Box)`
   margin-top: 10em;
   justify-content: center;
   align-items: center;
+
+  @media screen and (max-width: 500px) {
+    width: 90%;
+  }
 `;
 
 const AuthCard = styled(CustomCard)`
@@ -63,11 +65,6 @@ const AuthSignupButton = styled(Box)`
 `;
 
 export const Auth = () => {
-  const user = useSelector(getUser);
-  const loading = useSelector(getUserLoading);
-
-  console.log(user);
-  console.log(loading);
   const [loginTab, setLoginTab] = useState(true);
   return (
     <AuthContainer>

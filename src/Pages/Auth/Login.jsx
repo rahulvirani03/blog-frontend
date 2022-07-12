@@ -18,11 +18,8 @@ export const Login = () => {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
   const handleLogin = async () => {
-    console.log(username, password);
     const result = await dispatch(loginUser({ username, password }));
-    // console.log(result);
-    // localStorage.setItem("token", result.payload.data.token);
-    //  localStorage.setItem("User", JSON.stringify(result.payload.data.payload));
+
     if (result.payload.data.message === "Success") {
       navigate("/");
     }

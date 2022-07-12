@@ -10,8 +10,8 @@ import { getUser } from "../../Reducers/authSlice";
 
 import {
   fetchSingleBlogs,
-  getBlogsLoading,
   getSingleBlog,
+  getSingleBlogsLoading,
 } from "../../Reducers/blogSlice";
 import { fetchAllUsers, getAllUsers } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
@@ -111,7 +111,8 @@ const TagContainer = styled.div`
   }
 `;
 export const Post = () => {
-  const postLoading = useSelector(getBlogsLoading);
+  const postLoading = useSelector(getSingleBlogsLoading);
+  console.log(postLoading);
   const location = useLocation();
   const dispatch = useDispatch();
   const postPath = location.pathname;
