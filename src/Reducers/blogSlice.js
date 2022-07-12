@@ -139,15 +139,12 @@ const blogSlice = createSlice({
       })
       .addCase(fetchSingleBlogs.fulfilled, (state, action) => {
         state.singleBlogLoading = false;
-        console.log("ARE WE HERE");
         let data = action.payload.data;
         let categories = JSON.parse(data.tags);
-        console.log("HERE AS WELL");
         const singleBlog = {
           ...data,
           tags: categories,
         };
-        console.log("HERE AS WELL");
         state.singleBlog = singleBlog;
       })
       .addCase(fetchSingleBlogs.rejected, (state, action) => {
