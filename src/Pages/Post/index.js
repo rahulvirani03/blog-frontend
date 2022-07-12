@@ -25,6 +25,9 @@ const PostContainer = styled.div`
   border-radius: ${borderRadius};
   padding: 0px 0.2em;
   max-width: ${maxWidth};
+  @media screen and (max-width: 550px) {
+    width: 95%;
+  }
 `;
 const TitleContainer = styled.div`
   flex-direction: column;
@@ -43,18 +46,23 @@ const TitleContainer = styled.div`
   }
   .by {
     margin: 0px 0.5rem;
-
     padding: 0px;
     text-decoration: underline;
     font-size: 15px;
     color: ${primary};
   }
 `;
-const TitleTypo = styled(Typography)``;
+const TitleTypo = styled(Typography)`
+  font-size: 35px;
+
+  @media screen and (max-width: 550px) {
+    font-size: 18px;
+    text-align: justify;
+  }
+`;
 const PostImageContainer = styled.div`
   width: 50%;
   height: 300px;
-
   overflow: hidden;
   margin: 1em auto;
   border: 1px solid #808080;
@@ -63,6 +71,14 @@ const PostImageContainer = styled.div`
     height: 100%;
     width: 100%;
     object-position: 100% 120%;
+    @media screen and (max-width: 550px) {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  @media screen and (max-width: 550px) {
+    width: 100%;
+    height: 90%;
   }
 `;
 
@@ -70,8 +86,12 @@ const DescriptionContainer = styled.div`
   width: 100%;
   margin: auto;
   .border-top {
-    padding: 0px;
+    padding: 10px;
+    text-align: justify;
     border-top: 1px solid #dbdbdb;
+    @media screen and (max-width: 550px) {
+      font-size: 12px;
+    }
   }
   span {
     display: flex;
@@ -112,7 +132,6 @@ const TagContainer = styled.div`
 `;
 export const Post = () => {
   const postLoading = useSelector(getSingleBlogsLoading);
-  console.log(postLoading);
   const location = useLocation();
   const dispatch = useDispatch();
   const postPath = location.pathname;

@@ -153,10 +153,10 @@ const authSlice = createSlice({
       })
       .addCase(authenticateUser.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload.valid);
+
         if (!action.payload.valid) {
           localStorage.removeItem("token");
-          console.log("User not present");
+
           localStorage.removeItem("User");
           state.user = null;
           state.error = true;

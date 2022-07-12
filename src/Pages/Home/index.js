@@ -50,16 +50,22 @@ const TopContainer = styled.div`
       width: 90%;
     }
   }
+  @media screen and (max-width: 500px) {
+    width: 90%;
+  }
 `;
 const HomeContainer = styled.div`
   display: flex;
-  min-width: 99%;
+  min-width: 100%;
   margin-top: 1em;
-  padding: 0 0.5em;
+
   gap: 2%;
   @media screen and (max-width: 950px) {
     flex-direction: column;
     justify-content: center;
+  }
+  @media screen and (max-width: 500px) {
+    min-width: 100%;
   }
 `;
 
@@ -71,11 +77,9 @@ const SearchField = styled(InputField)`
 const BlogContainer = styled.div`
   min-width: 67%;
   border-radius: ${borderRadius};
-  padding: 1em;
   flex-direction: column;
   display: flex;
 
-  box-shadow: ${boxShadow};
   @media screen and (max-width: 950px) {
     margin: 0 auto;
     width: 90%;
@@ -85,7 +89,7 @@ const BlogContainer = styled.div`
   }
   @media screen and (max-width: 550px) {
     margin: 0 auto;
-    width: 90%;
+    width: 100%;
     flex-direction: column;
     display: flex;
     justify-content: center;
@@ -99,14 +103,18 @@ const BlogCard = styled.div`
   margin-bottom: 1em;
   border-radius: ${borderRadius};
   gap: 10px;
-
-  @media screen and (max-width: 550px) {
+  @media screen and (max-width: 500px) {
     flex-direction: column;
-    height: 325px;
+    min-height: 350px;
+    border: 1px solid black;
+  }
+  @media screen and (max-width: 900px) {
+    height: 300px;
   }
   img {
     height: 100%;
     width: 30%;
+    border-radius: inherit;
     object-fit: cover;
     @media screen and (max-width: 550px) {
       height: 60%;
@@ -118,6 +126,7 @@ const BlogCard = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 100%;
     width: 70%;
     @media screen and (max-width: 550px) {
       height: 40%;
@@ -125,15 +134,19 @@ const BlogCard = styled.div`
       object-fit: cover;
     }
     .title {
+      max-height: 28%;
       font-size: 25px;
       padding: 0;
       margin: 0px;
+      text-justify: distribute-all-lines;
       color: black;
       @media screen and (max-width: 550px) {
-        font-size: 20px;
+        font-size: 15px;
+        max-height: 45%;
       }
     }
     .description {
+      max-height: 40%;
       font-size: 15px;
       color: black;
     }
@@ -148,13 +161,14 @@ const BlogCard = styled.div`
       border-radius: 15px;
     }
     .tag-container {
+      max-height: 15%;
       text-align: center;
       width: 100%;
       width: fit-content;
       display: flex;
     }
     .profile {
-      border: 1px solid BLACK;
+      border: 1px solid black;
       height: 35px;
       width: 35px;
       border-radius: 50%;
@@ -180,13 +194,12 @@ const BlogCard = styled.div`
 const PeopleContainer = styled.div`
   width: 30%;
   height: fit-content;
+  border: 1px solid #dbdbdb;
   border-radius: ${borderRadius};
   padding: 1em;
-  box-shadow: ${boxShadow};
 
   @media screen and (max-width: 950px) {
     width: 95%;
-
     .People-Card {
       display: grid;
       grid-template-columns: 50% 50%;
@@ -368,12 +381,10 @@ export const Home = () => {
                       <img src={data.imageURL} alt="Dummy trial" />
                       <div className="card-body">
                         <span>
-                          <h5 className="title">
-                            {data.title.substring(0, 70) + ".."}
-                          </h5>
+                          <h5 className="title">{data.title}</h5>
                           <p className="description">
                             {width > 500 &&
-                              data.description.substring(0, 200) + ".."}
+                              data.description.substring(0, 300) + ".."}
                           </p>
                           <div className="tag-container">
                             {data.tags.map((tag) => (
