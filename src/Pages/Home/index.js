@@ -28,7 +28,7 @@ import {
   setAllUsers,
 } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
-import { maxWidth, borderRadius, boxShadow } from "../../Utils/constants";
+import { maxWidth, borderRadius } from "../../Utils/constants";
 import useWindowDimensions from "../../Components/windowDimension";
 
 const TopContainer = styled.div`
