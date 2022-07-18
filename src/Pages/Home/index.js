@@ -1,17 +1,16 @@
 import { InputAdornment, Typography } from "@material-ui/core";
-import { HowToRegOutlined, PersonAdd, Search } from "@material-ui/icons";
-import { nanoid } from "@reduxjs/toolkit";
-import React, { Fragment, useEffect, useState } from "react";
+import {
+  HowToRegOutlined,
+  Lock,
+  LockOpen,
+  PersonAdd,
+  Search,
+} from "@material-ui/icons";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { BlogTime } from "../../Components/BlogTime";
-import {
-  CustomButton,
-  CustomLink,
-  FlexBox,
-  InputField,
-} from "../../Components/Common";
+import { CustomButton, CustomLink, InputField } from "../../Components/Common";
 import { Loader } from "../../Components/Loader";
 import { authenticateUser } from "../../Reducers/authSlice";
 import {
@@ -28,12 +27,12 @@ import {
   setAllUsers,
 } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
-import { maxWidth, borderRadius } from "../../Utils/constants";
-import useWindowDimensions from "../../Components/windowDimension";
+import { maxWidth, borderRadius, boxShadow } from "../../Utils/constants";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 const TopContainer = styled.div`
   max-width: ${maxWidth};
-  padding: 1em;
+  padding: 0.5em;
   width: 95%;
   display: flex;
   flex-direction: column;
@@ -45,9 +44,11 @@ const TopContainer = styled.div`
   .search-container {
     width: 100%;
     margin: 1em auto;
+    border-radius: 20px !important;
     display: flex;
     @media screen and (max-width: 950px) {
-      width: 90%;
+      width: 100%;
+      margin: 0.5em auto;
     }
   }
   @media screen and (max-width: 500px) {
@@ -57,9 +58,8 @@ const TopContainer = styled.div`
 const HomeContainer = styled.div`
   display: flex;
   min-width: 100%;
-  margin-top: 1em;
-
-  gap: 2%;
+  margin-top: 0.5em;
+  gap: 1%;
   @media screen and (max-width: 950px) {
     flex-direction: column;
     justify-content: center;
@@ -70,126 +70,103 @@ const HomeContainer = styled.div`
 `;
 
 const SearchField = styled(InputField)`
-  margin: 10px;
-  height: 40px;
+  margin: 0 auto;
+  width: 100%;
+  box-shadow: #dbdbdb;
+  background: none;
   margin: 0 auto;
 `;
+
 const BlogContainer = styled.div`
   min-width: 67%;
   border-radius: ${borderRadius};
-  flex-direction: column;
-  display: flex;
-
-  @media screen and (max-width: 950px) {
-    margin: 0 auto;
-    width: 90%;
-    flex-direction: column;
-    display: flex;
-    justify-content: center;
-  }
-  @media screen and (max-width: 550px) {
-    margin: 0 auto;
-    width: 100%;
-    flex-direction: column;
-    display: flex;
-    justify-content: center;
+  border: 1px solid #dbdbdb;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: fit-content;
+  @media screen and (max-width: 600px) {
+    grid-template-columns: 1fr;
+    border: none;
   }
 `;
-const BlogCard = styled.div`
+
+const Visiblity = styled.div`
   display: flex;
-  padding: 0.5em;
-  border: 1px solid #dcdcdc;
-  height: 250px;
-  margin-bottom: 1em;
+
+  margin-right: 2px;
+  font-size: 12px;
+  margin-top: 2px;
+  color: grey;
+  margin-left: auto;
+`;
+const BlogCard = styled.div`
+  height: fit-content;
+  display: grid;
+  box-shadow: ${boxShadow};
+  grid-template-rows: 3% 40% 42% 20%;
+  margin: 1em;
+  min-height: 250px;
   border-radius: ${borderRadius};
-  gap: 10px;
-  @media screen and (max-width: 500px) {
-    flex-direction: column;
-    min-height: 350px;
-    border: 1px solid black;
+  @media screen and (max-width: 600px) {
+    min-height: 180px;
+    margin: 1em 0;
+
+    box-shadow: none;
+    border: 1px solid #dbdbdb;
   }
-  @media screen and (max-width: 900px) {
-    height: 300px;
+`;
+
+const Title = styled.div`
+  font-size: 25px;
+  height: 100%;
+  text-justify: auto;
+  padding: 0.5em;
+  color: black;
+  height: fit-content;
+  @media screen and (max-width: 600px) {
+    font-size: 18px;
   }
-  img {
-    height: 100%;
-    width: 30%;
-    border-radius: inherit;
-    object-fit: cover;
-    @media screen and (max-width: 550px) {
-      height: 60%;
-      width: 100%;
-      object-fit: cover;
-    }
-  }
-  .card-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    width: 70%;
-    @media screen and (max-width: 550px) {
-      height: 40%;
-      width: 100%;
-      object-fit: cover;
-    }
-    .title {
-      max-height: 28%;
-      font-size: 25px;
-      padding: 0;
-      margin: 0px;
-      text-justify: distribute-all-lines;
-      color: black;
-      @media screen and (max-width: 550px) {
-        font-size: 15px;
-        max-height: 45%;
-      }
-    }
-    .description {
-      max-height: 40%;
-      font-size: 15px;
-      color: black;
-    }
-    .tags {
-      background-color: ${primary};
-      color: white;
-      font-size: 12px;
-      padding: 4px;
-      text-align: center;
-      height: fit-content;
-      margin: auto 2px;
-      border-radius: 15px;
-    }
-    .tag-container {
-      max-height: 15%;
-      text-align: center;
-      width: 100%;
-      width: fit-content;
-      display: flex;
-    }
-    .profile {
-      border: 1px solid black;
-      height: 35px;
-      width: 35px;
-      border-radius: 50%;
-      @media screen and (max-width: 550px) {
-        margin-top: 5px;
-      }
-      .img {
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-      }
-    }
-    .by {
-      margin: 0px 0.5rem;
-      margin-top: 0.5rem;
-      padding: 0px;
-      text-decoration: underline;
-      font-size: 15px;
-      color: ${primary};
-    }
-  }
+`;
+
+const BlogCardInfo = styled.div`
+  display: flex;
+  height: 100%;
+  padding: 0.5em;
+  justify-content: space-around;
+  align-items: center;
+`;
+
+const Person = styled.div`
+  display: flex;
+  gap: 5px;
+  text-align: center;
+  align-items: center;
+  width: 50%;
+`;
+const PersonImage = styled.img`
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: grey;
+`;
+const PersonName = styled.div`
+  color: ${primary};
+  font-size: 15px;
+`;
+const TimeLog = styled.div`
+  display: flex;
+  width: 50%;
+  text-align: flex-start;
+`;
+
+const BlogButton = styled(CustomButton)`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  border-radius: 0 0px 5px 5px;
+  align-items: flex-end;
 `;
 const PeopleContainer = styled.div`
   width: 30%;
@@ -297,15 +274,31 @@ const UserIcon = ({ userItem, HandleFollowUser }) => {
 export const Home = () => {
   const usersLoading = useSelector(getUsersLoading);
   const blogsLoading = useSelector(getAllBlogsLoading);
-
   const [searching, setSearching] = useState("");
-  const { width } = useWindowDimensions();
   const user = localStorage.getItem("User");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const allBlogs = useSelector(getAllBlogs);
 
   let allUsers;
+  const CalcuateTime = ({ blogTimeVariable }) => {
+    let timeAgo = "";
+    if (blogTimeVariable) {
+      const date = parseISO(blogTimeVariable);
+      const timePeriod = formatDistanceToNow(date);
+      timeAgo = `${timePeriod} ago`;
+    }
+    return (
+      <span
+        style={{
+          marginLeft: "2px",
+          fontSize: "15px",
+        }}
+      >
+        {timeAgo}
+      </span>
+    );
+  };
   useEffect(() => {
     dispatch(authenticateUser());
   }, [dispatch]);
@@ -336,7 +329,7 @@ export const Home = () => {
       return user;
     });
     dispatch(setAllUsers(newAllUsers));
-    const result = await dispatch(followUser(userItem._id));
+    const result = dispatch(followUser(userItem._id));
 
     if (result.payload.data === "Followed") {
       dispatch(fetchUnfollowedUsers());
@@ -345,27 +338,24 @@ export const Home = () => {
 
   return (
     <TopContainer>
-      {/* {false ? ( */}
       {usersLoading || blogsLoading ? (
         <Loader />
       ) : (
-        <Fragment>
-          <div class="search-container">
-            <SearchField
-              onChange={(e) => handleSearch(e)}
-              size="large"
-              placeholder="Search blogs users or tags"
-              type="text"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="end">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-              variant="outlined"
-            />{" "}
-          </div>
+        <>
+          <SearchField
+            onChange={(e) => handleSearch(e)}
+            size="large"
+            placeholder="Search blogs users or tags"
+            type="text"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="end">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            variant="outlined"
+          />{" "}
           <HomeContainer>
             <BlogContainer>
               {allBlogs
@@ -376,43 +366,36 @@ export const Home = () => {
                     blog.username.toLowerCase().includes(searching)
                 )
                 .map((data) => (
-                  <CustomLink to={`/blog/${data._id}`}>
-                    <BlogCard key={nanoid()}>
-                      <img src={data.imageURL} alt="Dummy trial" />
-                      <div className="card-body">
-                        <span>
-                          <h5 className="title">{data.title}</h5>
-                          <p className="description">
-                            {width > 500 &&
-                              data.description.substring(0, 300) + ".."}
-                          </p>
-                          <div className="tag-container">
-                            {data.tags.map((tag) => (
-                              <p key={tag.name} className="tags">
-                                {tag}
-                              </p>
-                            ))}
-                          </div>
-                        </span>
-                        <span>
-                          <FlexBox style={{ alignSelf: "center" }}>
-                            <img
-                              className="profile"
-                              src={data.profileURL}
-                              alt={data.username}
-                            />
+                  <BlogCard key={data.id}>
+                    <Visiblity>
+                      {data.isGlobal ? (
+                        <LockOpen style={{ fontSize: "18px" }} />
+                      ) : (
+                        <Lock style={{ fontSize: "18px" }} />
+                      )}
+                    </Visiblity>
+                    <Title>{data.title}</Title>
+                    <BlogCardInfo>
+                      <Person>
+                        <PersonImage src={data.profileURL} alt="prfile image" />
+                        <CustomLink to={`/user/${data.username}`}>
+                          {" "}
+                          <PersonName>{data.username}</PersonName>
+                        </CustomLink>
+                      </Person>
 
-                            <div>
-                              <div className="by">{data.username}</div>
-                              <BlogTime blogTimeVariable={data.time} />
-                            </div>
-                          </FlexBox>
-                        </span>
-                      </div>
-                    </BlogCard>
-                  </CustomLink>
+                      <TimeLog>
+                        <span style={{ color: "grey" }}>Posted:</span>
+                        <CalcuateTime blogTimeVariable={data.time} />
+                      </TimeLog>
+                    </BlogCardInfo>
+                    <CustomLink to={`/blog/${data._id}`}>
+                      <BlogButton>Open</BlogButton>
+                    </CustomLink>
+                  </BlogCard>
                 ))}
             </BlogContainer>
+
             <PeopleContainer>
               <Typography variant="h5">
                 Follow Users to see their blogs on yout feed
@@ -447,7 +430,7 @@ export const Home = () => {
               </div>
             </PeopleContainer>
           </HomeContainer>
-        </Fragment>
+        </>
       )}
     </TopContainer>
   );
