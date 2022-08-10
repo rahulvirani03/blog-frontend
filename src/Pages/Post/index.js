@@ -13,7 +13,7 @@ import {
   getSingleBlog,
   getSingleBlogsLoading,
 } from "../../Reducers/blogSlice";
-import { fetchAllUsers, getAllUsers } from "../../Reducers/userSlice";
+import { getAllUsers } from "../../Reducers/userSlice";
 import { primary } from "../../Utils/colors";
 import { maxWidth, borderRadius } from "../../Utils/constants";
 
@@ -139,7 +139,6 @@ export const Post = () => {
   const postId = postPathArray[2];
 
   useEffect(() => {
-    dispatch(fetchAllUsers());
     dispatch(fetchSingleBlogs({ id: postId }));
   }, [postId, dispatch]);
   const localUser = useSelector(getUser);

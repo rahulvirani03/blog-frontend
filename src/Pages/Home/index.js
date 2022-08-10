@@ -6,13 +6,13 @@ import {
   PersonAdd,
   Search,
 } from "@material-ui/icons";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { CustomButton, CustomLink, InputField } from "../../Components/Common";
 import { Loader } from "../../Components/Loader";
-import { authenticateUser } from "../../Reducers/authSlice";
+import { authenticateUser, getUser } from "../../Reducers/authSlice";
 import {
   fetchAllBlogs,
   getAllBlogs,
@@ -272,14 +272,15 @@ const UserIcon = ({ userItem, HandleFollowUser }) => {
 };
 
 export const Home = () => {
+  const user = useSelector(getUser);
   const usersLoading = useSelector(getUsersLoading);
+  //console.log(usersLoading);
   const blogsLoading = useSelector(getAllBlogsLoading);
   const [searching, setSearching] = useState("");
-  const user = localStorage.getItem("User");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const allBlogs = useSelector(getAllBlogs);
-
   let allUsers;
   const CalcuateTime = ({ blogTimeVariable }) => {
     let timeAgo = "";
@@ -299,6 +300,7 @@ export const Home = () => {
       </span>
     );
   };
+
   useEffect(() => {
     dispatch(authenticateUser());
   }, [dispatch]);
@@ -307,7 +309,7 @@ export const Home = () => {
       navigate("/landing");
     }
   }, [navigate, user]);
-  useEffect(() => {
+  useCallback(() => {
     dispatch(fetchAllUsers());
     dispatch(fetchAllBlogs());
     dispatch(fetchUnfollowedUsers());

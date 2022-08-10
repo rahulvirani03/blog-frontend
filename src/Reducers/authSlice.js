@@ -1,15 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../api";
-let localUser;
-if (localStorage.getItem("User") !== "undefined") {
-  localUser = JSON.parse(localStorage.getItem("User"));
-}
 
 const initialState = {
-  user: localUser,
+  user: null,
   profileUser: {},
   error: false,
-  loading: true,
+  loading: false,
 };
 export const loginUser = createAsyncThunk(
   "auth/login",
@@ -124,10 +120,10 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         localStorage.setItem("token", action.payload.data.token);
-        localStorage.setItem(
-          "User",
-          JSON.stringify(action.payload.data.payload)
-        );
+        // localStorage.setItem(
+        //   "User",
+        //   JSON.stringify(action.payload.data.payload)
+        // );
         state.user = action.payload.data.payload;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -139,10 +135,10 @@ const authSlice = createSlice({
       .addCase(signUpUser.fulfilled, (state, action) => {
         state.loading = false;
         localStorage.setItem("token", action.payload.data.token);
-        localStorage.setItem(
-          "User",
-          JSON.stringify(action.payload.data.payload)
-        );
+        // localStorage.setItem(
+        //   "User",
+        //   JSON.stringify(action.payload.data.payload)
+        // );
         state.user = action.payload.data.payload;
       })
       .addCase(signUpUser.rejected, (state, action) => {
@@ -173,7 +169,7 @@ const authSlice = createSlice({
       .addCase(setProfileImage.fulfilled, (state, action) => {
         state.loading = false;
 
-        localStorage.setItem("User", JSON.stringify(action.payload.data.user));
+        // localStorage.setItem("User", JSON.stringify(action.payload.data.user));
         state.user = action.payload.data.user;
         state.profileUser.profileURL = action.payload.data.user.profileURL;
       })
