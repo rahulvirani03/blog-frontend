@@ -6,7 +6,7 @@ import {
   PersonAdd,
   Search,
 } from "@material-ui/icons";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -309,7 +309,7 @@ export const Home = () => {
       navigate("/landing");
     }
   }, [navigate, user]);
-  useCallback(() => {
+  useEffect(() => {
     dispatch(fetchAllUsers());
     dispatch(fetchAllBlogs());
     dispatch(fetchUnfollowedUsers());
